@@ -84,8 +84,8 @@ for ($i=1; $i -le $varonisusers; $i++)
 
     #add user to security group
     try{
-        Add-AzADGroupMember -MemberUserPrincipalName $memberUpn -TargetGroupDisplayName $targetgroupdisplayname -ErrorAction Stop
-        $result= "success"
+        Add-AzADGroupMember -MemberUserPrincipalName $memberUpn -TargetGroupDisplayName $targetgroupdisplayname -ErrorAction Stop 
+        $result= "success"   
     }
     catch{
         $result = "failure"
