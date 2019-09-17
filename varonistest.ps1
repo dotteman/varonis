@@ -4,12 +4,6 @@
 )
 
 
-
-
-#install Azure Module 
-Install-Module -Name Az -AllowClobber
-
-
 <#
 .SYNOPSIS
     Creates 20 Azure Active Directory User accounts with the name of “Test User &lt;Counter&gt;”.
@@ -38,7 +32,10 @@ Install-Module -Name Az -AllowClobber
 
 
 
-#define variables
+#install Azure Module 
+Install-Module -Name Az -AllowClobber
+
+
 #create secure-string for password
 $SecureStringPassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 
@@ -62,22 +59,41 @@ for ($i=1; $i -le $varonisusers; $i++)
     $mailnickname = $displayname.Replace(' ','')
     $upn = $mailnickname + "@daveottemangmail.onmicrosoft.com"
 
-    New-AzADUser -DisplayName $displayname -UserPrincipalName $upn -Password $SecureStringPassword -MailNickname $mailnickname
-
+    try{
+        New-AzADUser -DisplayName $displayname -UserPrincipalName $upn -Password $SecureStringPassword -MailNickname $mailnickname -ErrorAction Stop
+    }
+    catch{
+        Write-Warning "The user $displayname was not created"
+    }
 }
 
 #create Azure AD group
 $VaronisGroup = New-AzADGroup -DisplayName "Varonis Assignment2 Group" -MailNickname "VaronisAssignment2Group"
+
+#create logfile
+$logfile =  new-item c:\temp\logfile.txt -Force
 
 
 #loop and add each new Varonis Azure AD test user to test Azure AD group
 for ($i=1; $i -le $varonisusers; $i++)
 {
 
-#loop variables
-$memberUpn = (($accountname + $i).Replace(' ','') + "@daveottemangmail.onmicrosoft.com")
-$targetgroupdisplayname = "Varonis Assignment2 Group"
+    #loop variables
+    $memberUpn = (($accountname + $i).Replace(' ','') + "@daveottemangmail.onmicrosoft.com")
+    $targetgroupdisplayname = "Varonis Assignment2 Group"
 
-Add-AzADGroupMember -MemberUserPrincipalName $memberUpn -TargetGroupDisplayName $targetgroupdisplayname
-}
+    #add user to security group
+    try{
+        Add-AzADGroupMember -MemberUserPrincipalName $memberUpn -TargetGroupDisplayName $targetgroupdisplayname -ErrorAction Stop
+        $result= "success"
+    }
+    catch{
+        $result = "failure"
+    }
+    Finally{
+        Get-Date   | Out-File $logfile -Append
+        $memberupn | Out-File $logfile -Append
+        $result    | Out-File $logfile -Append
+    }
+}   
 
