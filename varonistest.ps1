@@ -85,7 +85,7 @@ if (!(Get-AzADGroup -DisplayName "Varonis Assignment2 Group")){
 
     $varonisGroup = New-AzADGroup -DisplayName "Varonis Assignment2 Group" -MailNickname "VaronisAssignment2Group"
 }else {
-       Write-Host "$varonisGroup already exists"
+       Write-Host ($varonisGroup).DisplayName" already exists!"
 }
 
 #create logfile
