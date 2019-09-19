@@ -80,8 +80,13 @@ for ($i=1; $i -le $varonisusers; $i++)
     }
 }
 
-#create Azure AD group
-$VaronisGroup = New-AzADGroup -DisplayName "Varonis Assignment2 Group" -MailNickname "VaronisAssignment2Group"
+#create Azure AD group if it does not exist
+if (!(Get-AzADGroup -DisplayName "Varonis Assignment2 Group")){  
+
+    $varonisGroup = New-AzADGroup -DisplayName "Varonis Assignment2 Group" -MailNickname "VaronisAssignment2Group"
+}else {
+       Write-Host "$varonisGroup already exists"
+}
 
 #create logfile
 $logfile =  new-item c:\temp\logfile.txt -Force
@@ -113,7 +118,7 @@ for ($i=1; $i -le $varonisusers; $i++)
 #assuming that the storage account and resource group have already been created
 
 #check if container created, if not create one 
-if (!(Get-AzStorageContainer -Name $containername -Context $storageaccountcontext)) {
+if (!(Get-AzStorageContainer -Name $containername -Context $storageaccountcontext -ErrorAction SilentlyContinue)) {
         Write-Host "creating container $containername"
         New-AzStorageContainer -Name $containername -Context $storageaccountcontext -Permission Blob
 }Else { Write-Host "Container $containername already created"
@@ -125,3 +130,6 @@ if (!(Get-AzStorageContainer -Name $containername -Context $storageaccountcontex
 write-host "uploading $logfile up to Azure container"
 
 .\azcopy copy $logfile "https://varonisstorageaccount.blob.core.windows.net/logfileblobs?sv=2019-02-02&sr=c&sig=ch30waRMOQTBvC6tmFL0medLgpUe3gLgLZmR%2BPgo%2FNQ%3D&st=2019-09-19T21%3A48%3A19Z&se=2019-10-03T21%3A48%3A19Z&sp=rwdl"
+
+
+### סיימתי !!!! ####
