@@ -31,15 +31,28 @@
 #>
 
 
+#variables 
 
-#install Azure Module 
-Install-Module -Name Az -AllowClobber
+#resource group
+$resourcegroup = "VaronisCodeTest"
 
+#storage account
+$storageaccount = get-AzStorageAccount -ResourceGroupName $resourcegroup
+
+#storage account context
+$storageaccountcontext = $storageaccount.Context
+
+#container
+$containername = "logfileblobs"
 
 #create secure-string for password
 $SecureStringPassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 
+#tenant domain name
+$tenantdomain = "@daveottemangmail.onmicrosoft.com"
 
+#install Azure Module 
+Install-Module -Name Az -AllowClobber
 
 
 #create password connection
@@ -57,7 +70,7 @@ for ($i=1; $i -le $varonisusers; $i++)
     #loop variables
     $displayname = $accountname + $i
     $mailnickname = $displayname.Replace(' ','')
-    $upn = $mailnickname + "@daveottemangmail.onmicrosoft.com"
+    $upn = $mailnickname + $tenantdomain
 
     try{
         New-AzADUser -DisplayName $displayname -UserPrincipalName $upn -Password $SecureStringPassword -MailNickname $mailnickname -ErrorAction Stop
@@ -79,7 +92,7 @@ for ($i=1; $i -le $varonisusers; $i++)
 {
 
     #loop variables
-    $memberUpn = (($accountname + $i).Replace(' ','') + "@daveottemangmail.onmicrosoft.com")
+    $memberUpn = (($accountname + $i).Replace(' ','') + $tenantdomain)
     $targetgroupdisplayname = "Varonis Assignment2 Group"
 
     #add user to security group
@@ -98,20 +111,6 @@ for ($i=1; $i -le $varonisusers; $i++)
 }   
 
 #assuming that the storage account and resource group have already been created
-
-#variables for storage account info.
-
-#resource group
-$resourcegroup = "VaronisCodeTest"
-
-#storage account
-$storageaccount = get-AzStorageAccount -ResourceGroupName $resourcegroup
-
-#storage account context
-$storageaccountcontext = $storageaccount.Context
-
-#container
-$containername = "logfileblobs"
 
 #check if container created, if not create one 
 if (!(Get-AzStorageContainer -Name $containername -Context $storageaccountcontext)) {
